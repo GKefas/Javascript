@@ -15,8 +15,6 @@ if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     function (position) {
       const { latitude, longitude } = position.coords;
-      console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
-
       const map = L.map('map').setView([longitude, latitude], 10);
 
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
