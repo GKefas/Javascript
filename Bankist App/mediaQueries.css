@@ -1,0 +1,62 @@
+@media only screen and (max-width:56.25em) {
+
+  /* 900 */
+  html {
+    font-size: 56.25%;
+  }
+
+  .app {
+    grid-template-rows: repeat(2, auto) repeat(3, 10rem) auto;
+  }
+
+  .balance {
+    margin-bottom: 1rem;
+  }
+
+  .summary {
+    grid-row: 2;
+    grid-column: 1/-1;
+    margin-bottom: 2rem;
+    margin-top: 0;
+  }
+
+  .btn--sort {
+    margin-right: 6rem;
+  }
+
+  .movements {
+    grid-column: 1/-1;
+    grid-row: 3/6;
+  }
+
+  .operation--transfer {
+    grid-column: 1/-1;
+    padding: 3rem 3rem;
+    /* NOTE ORIGINAL PADDING IS 3rem 4rem due to text vertical align with 
+    next row operations (loan,close) we subtracted the gap between 2 columns so
+    4rem-0.5rem-0.5rem(left 0.5rem and right 0.5rem for 2rem gap) = 3rem left and 3rem right
+    so padding all : 3rem; */
+  }
+
+  .form--transfer .form__label,
+  .form__input--to,
+  .form__input--amount {
+
+    width: 95%;
+  }
+
+  .logout-timer {
+    grid-column: 2;
+    margin: 1rem 0;
+  }
+}
+
+@media only screen and (max-width:40em) {
+
+  /* 640PX */
+
+  html {
+    font-size: 50%;
+  }
+
+}
