@@ -11,24 +11,35 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-if (navigator.geolocation) {
+if (navigator.geolocation)
   navigator.geolocation.getCurrentPosition(
     function (position) {
       const { longitude, latitude } = position.coords;
       const coords = [latitude, longitude];
-      const mapUrl = 'https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
+      const mapTileUrl = 'https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png';
 
       const map = L.map('map').setView(coords, 10);
 
-      L.tileLayer(mapUrl).addTo(map);
+      L.tileLayer(mapTileUrl).addTo(map);
 
-      L.marker(coords)
-        .addTo(map)
-        .bindPopup('A pretty CSS popup.<br> Easily customizable.')
-        .openPopup();
+      map.on('click', function (mapEvent) {
+        const { lat, lng } = mapEvent.latlng;
+        const popupOptions = {
+          maxWidth: 250,
+          minWidth: 100,
+          autoClose: false,
+          closeOnClick: false,
+          className: 'running-popup',
+        };
+
+        L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(L.popup(popupOptions))
+          .setPopupContent('Workout')
+          .openPopup();
+      });
     },
     function () {
       alert('Could not get your position');
     }
   );
-}
