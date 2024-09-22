@@ -11,10 +11,9 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-let map, mapEvent;
-
 class Workout {
   date = new Date();
+  // Creating Unique IDs
   id = Date.now().toString(36) + Math.random().toString(36).substring(2);
 
   constructor(coords, distance, duration) {
@@ -142,5 +141,3 @@ class App {
 }
 
 const app = new App();
-
-const date = new Date();
