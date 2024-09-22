@@ -175,7 +175,6 @@ class App {
 
   _renderWorkoutMarker(workout) {
     const { coords, distance, type } = workout;
-    console.log(type);
 
     const popupOptions = {
       maxWidth: 250,
