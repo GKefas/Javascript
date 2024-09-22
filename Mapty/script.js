@@ -3,14 +3,6 @@
 // prettier-ignore
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-const form = document.querySelector('.form');
-const containerWorkouts = document.querySelector('.workouts');
-const inputType = document.querySelector('.form__input--type');
-const inputDistance = document.querySelector('.form__input--distance');
-const inputDuration = document.querySelector('.form__input--duration');
-const inputCadence = document.querySelector('.form__input--cadence');
-const inputElevation = document.querySelector('.form__input--elevation');
-
 class Workout {
   date = new Date();
   // Creating Unique IDs
@@ -24,6 +16,7 @@ class Workout {
 }
 
 class Running extends Workout {
+  type = 'running';
   constructor(coords, distance, duration, cadence) {
     super(coords, distance, duration);
     this.cadence = cadence;
@@ -37,6 +30,7 @@ class Running extends Workout {
 }
 
 class Cycling extends Workout {
+  type = 'cycling';
   constructor(coords, distance, duration, ElevationGain) {
     super(coords, distance, duration);
     this.ElevationGain = ElevationGain;
@@ -52,10 +46,19 @@ class Cycling extends Workout {
 ////////////////////////////////////////////////////////
 // APPLICATION ARCHITECTURE
 
+const form = document.querySelector('.form');
+const containerWorkouts = document.querySelector('.workouts');
+const inputType = document.querySelector('.form__input--type');
+const inputDistance = document.querySelector('.form__input--distance');
+const inputDuration = document.querySelector('.form__input--duration');
+const inputCadence = document.querySelector('.form__input--cadence');
+const inputElevation = document.querySelector('.form__input--elevation');
+
 class App {
   // Private properties
   #map;
   #mapEvent;
+  #workouts = [];
 
   // Page Loads
   constructor() {
@@ -114,28 +117,78 @@ class App {
 
   _newWorkout(e) {
     e.preventDefault();
+    // Helper Functions
+    const checkValid = (...data) => data.every(data => Number.isFinite(data));
+    const checkPositive = (...data) => data.every(data => data > 0);
 
-    // Clear input fields
+    // Get data from form and coords from click
+    const type = inputType.value;
+    const distance = +inputDistance.value;
+    const duration = +inputDuration.value;
+    const { lat, lng } = this.#mapEvent.latlng;
+    let workout;
+
+    // Create workout based on type
+    // Running Type
+    if (type === 'running') {
+      const cadence = +inputCadence.value;
+
+      // Check if data is valid
+      if (
+        !checkValid(distance, duration, cadence) ||
+        !checkPositive(distance, duration, cadence)
+      )
+        return alert('Inputs have to be positive numbers!');
+
+      workout = new Running([lat, lng], distance, duration, cadence);
+    }
+
+    // Cycling type
+    if (type === 'cycling') {
+      const elevation = +inputElevation.value;
+
+      // Check if data is valid
+      if (
+        !checkValid(distance, duration, elevation) ||
+        !checkPositive(distance, duration)
+      )
+        return alert('Inputs have to be positive numbers!');
+
+      workout = new Cycling([lat, lng], distance, duration, elevation);
+    }
+
+    // Add new object to workout array
+    this.#workouts.push(workout);
+
+    // Render workout on map as marker
+    this._renderWorkoutMarker(workout);
+
+    // Render workout on list
+
+    // Hide form + Clear input fields
     inputDistance.value =
       inputDuration.value =
       inputCadence.value =
       inputElevation.value =
         '';
+  }
 
-    // Display marker
-    const { lat, lng } = this.#mapEvent.latlng;
+  _renderWorkoutMarker(workout) {
+    const { coords, distance, type } = workout;
+    console.log(type);
+
     const popupOptions = {
       maxWidth: 250,
       minWidth: 100,
       autoClose: false,
       closeOnClick: false,
-      className: 'running-popup',
+      className: `${type}-popup`,
     };
 
-    L.marker([lat, lng])
+    L.marker(coords)
       .addTo(this.#map)
       .bindPopup(L.popup(popupOptions))
-      .setPopupContent('Workout')
+      .setPopupContent('workout')
       .openPopup();
   }
 }
