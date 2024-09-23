@@ -6,7 +6,6 @@ class Workout {
   date = new Date();
   // Creating Unique IDs
   id = Date.now().toString(36) + Math.random().toString(36).substring(2);
-  clicks = 0;
 
   constructor(coords, distance, duration) {
     this.coords = coords; // [lat,lng]
@@ -22,10 +21,6 @@ class Workout {
     //this.date.getMonth will return a number between 0-10 so we can use it as index to months arr
     return `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${months[this.date.getMonth()]} ${this.date.getDate()}`;
     
-  }
-  
-  click() {
-    this.clicks++;
   }
 }
 
@@ -83,6 +78,9 @@ class App {
     // get the current position when constructor called
     this._getPosition();
 
+    // Get data from local storage
+    this._getLocalStorage();
+
     // Set eventListener to form when we submit
     form.addEventListener('submit', this._newWorkout.bind(this));
 
@@ -122,6 +120,10 @@ class App {
 
     // Handling clicks on map
     this.#map.on('click', this._showForm.bind(this));
+
+    this.#workouts.forEach(workout => {
+      this._renderWorkoutMarker(workout);
+    });
   }
 
   _showForm(mapE) {
@@ -204,6 +206,9 @@ class App {
 
     // Hide form + Clear input fields
     this._hideForm();
+
+    // Set local storage to all workouts
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -248,6 +253,10 @@ class App {
     let html = `
       <li class="workout workout--${type}" data-id="${id}">
         <h2 class="workout__title">${description}</h2>
+        <div class="workout__events">
+          <span class="workout__edit">✏️</span>
+          <span class="workout__delete">❌</span>
+        </div>
         <div class="workout__details">
           <span class="workout__icon">${type === 'running' ? '🏃‍♂️' : '🚴‍♀️'}</span>
           <span class="workout__value">${distance}</span>
@@ -283,7 +292,7 @@ class App {
             <span class="workout__unit">km/h</span>
           </div>
           <div class="workout__details">
-            <span class="workout__icon">⛰</span>
+            <span class="workout__icon workout__icon--elevation">⛰</span>
             <span class="workout__value">${ElevationGain}</span>
             <span class="workout__unit">m</span>
           </div>
@@ -308,10 +317,41 @@ class App {
         duration: 1,
       },
     });
+  }
 
-    // using public interface
-    workout.click();
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+
+    if (!data) return;
+
+    this.#workouts = data;
+
+    this.#workouts.forEach(workout => {
+      this._renderWorkout(workout);
+    });
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
+    // DO IT ONCE BECAUSE IT WILL PERMANENTLY RELOAD
   }
 }
 
 const app = new App();
+// app.reset();
+
+// TODO: Edit a workout
+// TODO: Delete a workout
+// TODO: Delete all workouts
+// TODO: Ability to sort workouts by a field
+// TODO: Re-build objects coming from Local Storage
+// TODO: More realistic error and confirmation messages
+// TODO: Position the map to show all workouts
+// TODO: Draw lines and shapes instead of just points
+// TODO: Geocode location from coordinates !Needs ASYNC
+// TODO: Display weather data for workout time and place !!Needs ASYNC

@@ -76,6 +76,8 @@ a:visited {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0.75rem 1.5rem;
+
+  position: relative;
 }
 
 .workout--running {
@@ -89,18 +91,23 @@ a:visited {
 .workout__title {
   font-size: 1.7rem;
   font-weight: 600;
-  grid-column: 1 / -1;
+  grid-column: 1 / -2;
 }
 
 .workout__details {
   display: flex;
   align-items: baseline;
+  justify-content: center;
 }
 
 .workout__icon {
   font-size: 1.8rem;
   margin-right: 0.2rem;
   height: 0.28rem;
+}
+
+.workout__icon--elevation {
+  margin-right: 0.7rem;
 }
 
 .workout__value {
@@ -114,6 +121,22 @@ a:visited {
   text-transform: uppercase;
   font-weight: 800;
 }
+
+.workout__events {
+  grid-column: -2;
+  grid-row: 1;
+  display: flex;
+  justify-content: end;
+}
+
+.workout__events>span {
+  font-size: 1.25rem;
+}
+
+.workout__events>span:not(:last-child) {
+  margin-right: 0.5rem;
+}
+
 
 .form {
   background-color: var(--color-dark--2);
