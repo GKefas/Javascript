@@ -122,21 +122,26 @@ a:visited {
   font-weight: 800;
 }
 
-.workout__events {
+.workout__operations {
   grid-column: -2;
   grid-row: 1;
   display: flex;
   justify-content: end;
 }
 
-.workout__events>span {
+.workout__operations>span {
   font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  transition: background-color 0.2s;
+  border-radius: 5px;
 }
 
-.workout__events>span:not(:last-child) {
-  margin-right: 0.5rem;
+.workout__operations>span:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
-
 
 .form {
   background-color: var(--color-dark--2);

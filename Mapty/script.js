@@ -79,7 +79,7 @@ class App {
     this._getPosition();
 
     // Get data from local storage
-    this._getLocalStorage();
+    // this._getLocalStorage();
 
     // Set eventListener to form when we submit
     form.addEventListener('submit', this._newWorkout.bind(this));
@@ -89,6 +89,12 @@ class App {
 
     // Set the view of map in the clicked workout from the list
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+
+    // Set the operations of every workout
+    containerWorkouts.addEventListener(
+      'click',
+      this._chooseOperation.bind(this)
+    );
   }
 
   _getPosition() {
@@ -126,10 +132,15 @@ class App {
     });
   }
 
-  _showForm(mapE) {
+  _showForm(mapE, ...data) {
     this.#mapEvent = mapE;
     form.classList.remove('hidden');
     inputDistance.focus();
+
+    inputDistance.value = data?.distance || '';
+    inputDuration.value = data?.duration || '';
+    inputCadence.value = data?.cadence || '';
+    inputElevation.value = data?.elevation || '';
   }
 
   _hideForm() {
@@ -155,9 +166,6 @@ class App {
 
   _newWorkout(e) {
     e.preventDefault();
-    // Helper Functions
-    const checkValid = (...data) => data.every(data => Number.isFinite(data));
-    const checkPositive = (...data) => data.every(data => data > 0);
 
     // Get data from form and coords from click
     const type = inputType.value;
@@ -173,8 +181,8 @@ class App {
 
       // Check if data is valid
       if (
-        !checkValid(distance, duration, cadence) ||
-        !checkPositive(distance, duration, cadence)
+        !this._checkValid(distance, duration, cadence) ||
+        !this._checkPositive(distance, duration, cadence)
       )
         return alert('Inputs have to be positive numbers!');
 
@@ -209,6 +217,30 @@ class App {
 
     // Set local storage to all workouts
     this._setLocalStorage();
+  }
+
+  _chooseOperation(e) {
+    // Helper function to choose between operations
+    if (e.target.closest('.workout__edit')) this._editWorkout(e);
+    if (e.target.closest('.workout__delete')) this._deleteWorkout(e);
+  }
+
+  _editWorkout(e) {
+    // Take the id of current workout
+    // Find workout in workouts[] based on ID
+    // Open the form again with the data from current workout
+    // Take the data from the form
+    // Update the current workout in array
+    // Render Workout in list
+    // Render WorkoutMarker
+  }
+
+  _deleteWorkout(e) {
+    // Take the id of current workout
+    // Find workout in workouts[] based on ID
+    // Remove it from Workout list
+    // Remove it from WorkoutMarkers with coords property
+    // Delete it from workouts[]
   }
 
   _renderWorkoutMarker(workout) {
@@ -253,7 +285,7 @@ class App {
     let html = `
       <li class="workout workout--${type}" data-id="${id}">
         <h2 class="workout__title">${description}</h2>
-        <div class="workout__events">
+        <div class="workout__operations">
           <span class="workout__edit">✏️</span>
           <span class="workout__delete">❌</span>
         </div>
@@ -334,6 +366,10 @@ class App {
       this._renderWorkout(workout);
     });
   }
+
+  // Helper Functions
+  _checkValid = (...data) => data.every(data => Number.isFinite(data));
+  _checkPositive = (...data) => data.every(data => data > 0);
 
   reset() {
     localStorage.removeItem('workouts');
