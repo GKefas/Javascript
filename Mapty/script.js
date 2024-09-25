@@ -71,6 +71,7 @@ class App {
   #mapZoomLevel = 10;
   #mapEvent;
   #workouts = [];
+  #markers = [];
 
   // Page Loads
   constructor() {
@@ -195,8 +196,8 @@ class App {
 
       // Check if data is valid
       if (
-        !checkValid(distance, duration, elevation) ||
-        !checkPositive(distance, duration)
+        !this._checkValid(distance, duration, elevation) ||
+        !this._checkPositive(distance, duration)
       )
         return alert('Inputs have to be positive numbers!');
 
@@ -220,27 +221,28 @@ class App {
   }
 
   _chooseOperation(e) {
-    // Helper function to choose between operations
-    if (e.target.closest('.workout__edit')) this._editWorkout(e);
+    // Helper function to choose between operations if there are <1
     if (e.target.closest('.workout__delete')) this._deleteWorkout(e);
   }
 
-  _editWorkout(e) {
-    // Take the id of current workout
-    // Find workout in workouts[] based on ID
-    // Open the form again with the data from current workout
-    // Take the data from the form
-    // Update the current workout in array
-    // Render Workout in list
-    // Render WorkoutMarker
-  }
-
   _deleteWorkout(e) {
-    // Take the id of current workout
-    // Find workout in workouts[] based on ID
+    const workoutEl = e.target.closest('.workout');
+    const workoutID = workoutEl.dataset.id;
+
+    // Find workout and workoutIndex in workouts[] based on ID
+    const workout = this.#workouts.find(work => work.id === workoutID);
+    const workoutIndex = this.#workouts.findIndex(
+      work => work.id === workoutID
+    );
     // Remove it from Workout list
+    this._removeWorkout(workoutID);
+
     // Remove it from WorkoutMarkers with coords property
+    this._removeWorkoutMarker(workout.coords);
+
     // Delete it from workouts[]
+
+    this.#workouts.splice(workoutIndex, 1);
   }
 
   _renderWorkoutMarker(workout) {
@@ -258,11 +260,26 @@ class App {
       className: `${type}-popup`,
     };
 
-    L.marker(coords)
+    const marker = L.marker(coords)
       .addTo(this.#map)
       .bindPopup(L.popup(popupOptions))
       .setPopupContent(`${type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${description}`)
       .openPopup();
+
+    // Save it in array
+    this.#markers.push(marker);
+  }
+
+  _removeWorkoutMarker(workoutCoords) {
+    const [lat, lng] = workoutCoords;
+
+    // Find the index of marker in markers[] of the clicked workout
+    const index = this.#markers.findIndex(marker => {
+      const { lat: latMark, lng: lngMark } = marker._latlng;
+      return lat === latMark && lng === lngMark;
+    });
+
+    this.#map.removeLayer(this.#markers[index]);
   }
 
   _renderWorkout(workout) {
@@ -286,7 +303,6 @@ class App {
       <li class="workout workout--${type}" data-id="${id}">
         <h2 class="workout__title">${description}</h2>
         <div class="workout__operations">
-          <span class="workout__edit">✏️</span>
           <span class="workout__delete">❌</span>
         </div>
         <div class="workout__details">
@@ -334,6 +350,20 @@ class App {
     form.insertAdjacentHTML('afterend', html);
   }
 
+  _removeWorkout(workoutID) {
+    if (!workoutID)
+      return alert('Something occured with App.\nPlease try again later!');
+
+    const workoutList = containerWorkouts.querySelectorAll('.workout');
+
+    // Find the based on ID the the workout element and remove it
+    workoutList.forEach(workout => {
+      if (workout.dataset.id === workoutID) {
+        workout.outerHTML = '';
+      }
+    });
+  }
+
   _moveToPopup(e) {
     const workoutEl = e.target.closest('.workout');
 
@@ -353,6 +383,7 @@ class App {
 
   _setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+    localStorage.setItem('marker', JSON.stringify(this.#markers));
   }
 
   _getLocalStorage() {
@@ -381,8 +412,7 @@ class App {
 const app = new App();
 // app.reset();
 
-// TODO: Edit a workout
-// TODO: Delete a workout
+// TODO: Delete a workout ✅
 // TODO: Delete all workouts
 // TODO: Ability to sort workouts by a field
 // TODO: Re-build objects coming from Local Storage
