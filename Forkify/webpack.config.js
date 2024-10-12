@@ -7,7 +7,7 @@ const BundleAnalyzerPlugin =
 module.exports = {
   mode: 'development',
   entry: {
-    bundle: path.resolve(__dirname, 'src/index.js'),
+    bundle: path.resolve(__dirname, 'src/js/index.js'),
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
