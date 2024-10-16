@@ -1,13 +1,12 @@
+import { API_URL } from './config';
+import { getJSON } from './helpers';
 const state = {
   recipe: {},
 };
 
 const loadRecipe = async function (id) {
   try {
-    const urlAPI = 'https://forkify-api.herokuapp.com/api/v2/recipes/';
-    const res = await fetch(urlAPI + id);
-    const data = await res.json();
-
+    const data = await getJSON(`${API_URL}/${id}`);
     // Structure from returned api call Json object:
     // data : {
     //    data : {
@@ -17,8 +16,6 @@ const loadRecipe = async function (id) {
     //    }
     //    status : ""
     // }
-    // Guard clause about rejected Promise with ok = false
-    if (!res.ok) throw new Error(`${data.message} (${res.status})`);
     const { recipe } = data.data;
 
     // Removing _ and Replace with Camel Notation keys of Object
@@ -33,7 +30,8 @@ const loadRecipe = async function (id) {
       ingredients: recipe.ingredients,
     };
   } catch (err) {
-    alert(err);
+    // TODO:Temp error handling
+    console.error(err);
   }
 };
 

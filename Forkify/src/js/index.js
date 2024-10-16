@@ -1,17 +1,9 @@
-import * as model from './model.js';
-import recipeView from './views/recipeView.js';
+import * as model from './model';
+import recipeView from './views/recipeView';
 import '.././sass/main.scss';
 
 import '.././img/favicon.png';
 import '.././img/logo.png';
-
-const timeout = function (s) {
-  return new Promise(function (_, reject) {
-    setTimeout(function () {
-      reject(new Error(`Request took too long! Timeout after ${s} second`));
-    }, s * 1000);
-  });
-};
 
 // https://forkify-api.herokuapp.com/v2
 
@@ -32,7 +24,7 @@ const controlRecipes = async function () {
     // 2) Rendering recipe
     recipeView.render(model.state.recipe);
   } catch (err) {
-    alert(err);
+    console.error(err);
   }
 };
 
