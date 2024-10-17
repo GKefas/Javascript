@@ -2,11 +2,16 @@ import { API_URL } from './config';
 import { getJSON } from './helpers';
 const state = {
   recipe: {},
+  search: {
+    query: '',
+    results: [],
+  },
 };
 
 const loadRecipe = async function (id) {
   try {
     const data = await getJSON(`${API_URL}/${id}`);
+
     // Structure from returned api call Json object:
     // data : {
     //    data : {
@@ -30,9 +35,37 @@ const loadRecipe = async function (id) {
       ingredients: recipe.ingredients,
     };
   } catch (err) {
-    // TODO:Temp error handling
-    console.error(err);
+    throw err;
   }
 };
 
-export { state, loadRecipe };
+const loadSearchResults = async function (query) {
+  try {
+    state.search.query = query;
+    const data = await getJSON(`${API_URL}/?search=${query}`);
+
+    // Structure from returned api call Json object:
+    // data : {
+    //    data : {
+    //        recipes : [{...},{...}+]
+    //    },
+    //    status : String,
+    //    results : Number
+    // }
+    const { recipes } = data.data;
+
+    // Removing _ and Replace with Camel Notation keys of Object
+    state.search.results = recipes.map(recipe => {
+      return {
+        id: recipe.id,
+        title: recipe.title,
+        publisher: recipe.publisher,
+        image: recipe.image_url,
+      };
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export { state, loadRecipe, loadSearchResults };
