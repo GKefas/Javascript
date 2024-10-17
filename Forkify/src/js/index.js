@@ -5,10 +5,6 @@ import '.././sass/main.scss';
 import '.././img/favicon.png';
 import '.././img/logo.png';
 
-// https://forkify-api.herokuapp.com/v2
-
-///////////////////////////////////////
-
 const controlRecipes = async function () {
   try {
     // Load from # in the page url
@@ -28,9 +24,7 @@ const controlRecipes = async function () {
   }
 };
 
-// Add hashchange and load events to window to load recipes from there
-// load is for debugging in case someone took the url and paste it to
-// another browser tab
-['hashchange', 'load'].forEach(ev =>
-  window.addEventListener(ev, controlRecipes)
-);
+const init = function () {
+  recipeView.addHandlerRender(controlRecipes);
+};
+init();
