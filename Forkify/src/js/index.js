@@ -3,13 +3,12 @@ import { TIMEOUT_SEC } from './config';
 import recipeView from './views/recipeView';
 import searchView from './views/searchView';
 import resultsView from './views/resultsView';
+import paginationView from './views/paginationView';
 
 import '.././sass/main.scss';
 
 import '.././img/favicon.png';
 import '.././img/logo.png';
-
-if (module.hot) module.hot.accept;
 
 const controlRecipes = async function () {
   try {
@@ -35,21 +34,28 @@ const controlSearchResults = async function () {
     // 1) Take search value from input element if there isnt then return
     const query = searchView.getQuery();
     if (!query) return;
-    resultsView.renderSpinner();
 
+    resultsView.renderSpinner();
     // 2) Load data from API and take them from state Object
     await model.loadSearchResults(query);
 
     // 3) Render Results
-    resultsView.render(model.getSearchResultsPage(1));
+    resultsView.render(model.getSearchResultsPage());
+
+    // 4) Render initial pagination buttons
+    paginationView.render(model.state.search);
   } catch (err) {
-    resultsView.renderError(
-      `Searching recipes took too long! Timeout after ${TIMEOUT_SEC} seconds`
-    );
+    resultsView.renderError();
   }
 };
 
-controlSearchResults();
+const controlPagination = function (goToPage) {
+  // 1) Render NEW Results
+  resultsView.render(model.getSearchResultsPage(goToPage));
+
+  // 2) Render NEW pagination buttons
+  paginationView.render(model.state.search);
+};
 
 const init = function () {
   // Set eventHandler to recipe Component
@@ -57,5 +63,8 @@ const init = function () {
 
   // Set eventHandler to search button
   searchView.addHandlerSearch(controlSearchResults);
+
+  // Set eventHandler to pagination buttons
+  paginationView.addHandlerCLick(controlPagination);
 };
 init();
