@@ -1,10 +1,15 @@
 import * as model from './model';
+import { TIMEOUT_SEC } from './config';
 import recipeView from './views/recipeView';
 import searchView from './views/searchView';
+import resultsView from './views/resultsView';
+
 import '.././sass/main.scss';
 
 import '.././img/favicon.png';
 import '.././img/logo.png';
+
+if (module.hot) module.hot.accept;
 
 const controlRecipes = async function () {
   try {
@@ -30,14 +35,17 @@ const controlSearchResults = async function () {
     // 1) Take search value from input element if there isnt then return
     const query = searchView.getQuery();
     if (!query) return;
+    resultsView.renderSpinner();
 
     // 2) Load data from API and take them from state Object
     await model.loadSearchResults(query);
 
     // 3) Render Results
-    console.log(model.state.search.results);
+    resultsView.render(model.state.search.results);
   } catch (err) {
-    console.log(err);
+    resultsView.renderError(
+      `Searching recipes took too long! Timeout after ${TIMEOUT_SEC} seconds`
+    );
   }
 };
 

@@ -41,6 +41,7 @@ const loadRecipe = async function (id) {
 
 const loadSearchResults = async function (query) {
   try {
+    // 1) HTTP Request (GET)
     state.search.query = query;
     const data = await getJSON(`${API_URL}/?search=${query}`);
 
@@ -54,7 +55,7 @@ const loadSearchResults = async function (query) {
     // }
     const { recipes } = data.data;
 
-    // Removing _ and Replace with Camel Notation keys of Object
+    // 2) Removing _ and Replace with Camel Notation keys of Object and store it to state
     state.search.results = recipes.map(recipe => {
       return {
         id: recipe.id,
