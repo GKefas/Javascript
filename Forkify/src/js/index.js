@@ -41,7 +41,7 @@ const controlSearchResults = async function () {
     await model.loadSearchResults(query);
 
     // 3) Render Results
-    resultsView.render(model.state.search.results);
+    resultsView.render(model.getSearchResultsPage(1));
   } catch (err) {
     resultsView.renderError(
       `Searching recipes took too long! Timeout after ${TIMEOUT_SEC} seconds`
