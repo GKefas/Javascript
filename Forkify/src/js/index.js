@@ -1,5 +1,4 @@
 import * as model from './model';
-import { TIMEOUT_SEC } from './config';
 import recipeView from './views/recipeView';
 import searchView from './views/searchView';
 import resultsView from './views/resultsView';
@@ -57,9 +56,20 @@ const controlPagination = function (goToPage) {
   paginationView.render(model.state.search);
 };
 
+const controlServings = function (newServings) {
+  // 1) Update the recipe servings (in state)
+  model.updateServings(newServings);
+
+  // 2) Update the view
+  recipeView.render(model.state.recipe);
+};
+
 const init = function () {
   // Set eventHandler to recipe Component
   recipeView.addHandlerRender(controlRecipes);
+
+  // Set eventHandler to Servings +/- buttons
+  recipeView.addHandlerUpdateServings(controlServings);
 
   // Set eventHandler to search button
   searchView.addHandlerSearch(controlSearchResults);
@@ -67,4 +77,5 @@ const init = function () {
   // Set eventHandler to pagination buttons
   paginationView.addHandlerCLick(controlPagination);
 };
+
 init();
