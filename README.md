@@ -1,4 +1,4 @@
-#JavaScript Course
+# JavaScript Course
 
 ## Some Projects i created while studying about Advanced Javascript and Web APIs
 
