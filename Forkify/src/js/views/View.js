@@ -5,10 +5,50 @@ export default class View {
   render(data) {
     if (!data || (Array.isArray(data) && data.length === 0))
       return this.renderError();
+
+    // Store data as private field to use it in generateMarkup which is implements in Child classes
     this._data = data;
     const markup = this._generateMarkup();
     this._clear(); // Clear everything inside parent element
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  update(data) {
+    // Store data as private field to use it in generateMarkup which is implements in Child classes
+    this._data = data;
+    const newMarkup = this._generateMarkup();
+
+    // Creating Virtual DOM in JS memory not in Page based on  newMarkup
+    const newDom = document.createRange().createContextualFragment(newMarkup);
+
+    const newElements = Array.from(newDom.querySelectorAll('*'));
+    const curElements = Array.from(this._parentElement.querySelectorAll('*'));
+
+    // Loop Over Virtual DOM elements
+    newElements.forEach((newEl, i) => {
+      // Set the curEl to the same as newElement
+      const curEl = curElements[i];
+
+      // Update changed TEXT
+      if (
+        !newEl.isEqualNode(curEl) &&
+        newEl.firstChild?.nodeValue.trim() !== ''
+      )
+        curEl.textContent = newEl.textContent;
+
+      // Update changed ATTRIBUTES
+      if (!newEl.isEqualNode(curEl)) {
+        // Take all attributes from changed elements in a []
+        Array.from(newEl.attributes).forEach(attr =>
+          // Reset all attributes with each names and values
+          curEl.setAttribute(attr.name, attr.value)
+        );
+      }
+    });
+
+    // Complexity , scenario change based on how much elements are gonna be updated
+    // O(n^2) : worst scenario
+    // O(n) : best scenario
   }
 
   _clear() {
