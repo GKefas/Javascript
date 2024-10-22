@@ -67,12 +67,25 @@ const controlServings = function (newServings) {
   recipeView.update(model.state.recipe);
 };
 
+const controlAddBookmark = function () {
+  // 1.?) Add the recipe as bookmarked if it isn't already
+  if (!model.state.recipe.bookmarked) model.addBookmark(model.state.recipe);
+  // 1.?) Remove the recipe from bookmarked if it is
+  else model.removeBookmark(model.state.recipe.id);
+
+  // Update UI
+  recipeView.update(model.state.recipe);
+};
+
 const init = function () {
   // Set eventHandler to recipe Component
   recipeView.addHandlerRender(controlRecipes);
 
   // Set eventHandler to Servings +/- buttons
   recipeView.addHandlerUpdateServings(controlServings);
+
+  // Set eventHandler to bookmark button
+  recipeView.addHandlerAddBookmark(controlAddBookmark);
 
   // Set eventHandler to search button
   searchView.addHandlerSearch(controlSearchResults);
