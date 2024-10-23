@@ -2,13 +2,16 @@ import icons from '../.././img/icons.svg';
 
 export default class View {
   _data;
-  render(data) {
+  render(data, render = true) {
     if (!data || (Array.isArray(data) && data.length === 0))
       return this.renderError();
 
     // Store data as private field to use it in generateMarkup which is implements in Child classes
     this._data = data;
     const markup = this._generateMarkup();
+
+    if (!render) return markup;
+
     this._clear(); // Clear everything inside parent element
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
   }

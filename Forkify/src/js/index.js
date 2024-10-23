@@ -3,6 +3,7 @@ import recipeView from './views/recipeView';
 import searchView from './views/searchView';
 import resultsView from './views/resultsView';
 import paginationView from './views/paginationView';
+import bookmarksView from './views/bookmarksView';
 
 import '.././sass/main.scss';
 
@@ -20,6 +21,7 @@ const controlRecipes = async function () {
 
     // 3) Update results view to mark selected search result
     resultsView.update(model.getSearchResultsPage());
+    bookmarksView.update(model.state.bookmarks);
 
     // 4) Load Recipe
     await model.loadRecipe(id);
@@ -27,7 +29,7 @@ const controlRecipes = async function () {
     // 5) Render recipe
     recipeView.render(model.state.recipe);
   } catch (err) {
-    recipeView.renderError();
+    recipeView.renderError(err);
   }
 };
 
@@ -47,6 +49,8 @@ const controlSearchResults = async function () {
     // 4) Render initial pagination buttons
     paginationView.render(model.state.search);
   } catch (err) {
+    console.log(err);
+
     resultsView.renderError();
   }
 };
@@ -68,13 +72,15 @@ const controlServings = function (newServings) {
 };
 
 const controlAddBookmark = function () {
-  // 1.?) Add the recipe as bookmarked if it isn't already
+  // 1.?) Add/remove the recipe as bookmarked if it isn't already
   if (!model.state.recipe.bookmarked) model.addBookmark(model.state.recipe);
-  // 1.?) Remove the recipe from bookmarked if it is
   else model.removeBookmark(model.state.recipe.id);
 
   // Update UI
   recipeView.update(model.state.recipe);
+
+  // Render bookmarks
+  bookmarksView.render(model.state.bookmarks);
 };
 
 const init = function () {
