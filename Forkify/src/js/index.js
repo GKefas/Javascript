@@ -21,15 +21,17 @@ const controlRecipes = async function () {
 
     // 3) Update results view to mark selected search result
     resultsView.update(model.getSearchResultsPage());
+
+    // 4) Updating bookmarks view
     bookmarksView.update(model.state.bookmarks);
 
-    // 4) Load Recipe
+    // 5) Load Recipe
     await model.loadRecipe(id);
 
-    // 5) Render recipe
+    // 6) Render recipe
     recipeView.render(model.state.recipe);
   } catch (err) {
-    recipeView.renderError(err);
+    recipeView.renderError();
   }
 };
 
@@ -49,8 +51,6 @@ const controlSearchResults = async function () {
     // 4) Render initial pagination buttons
     paginationView.render(model.state.search);
   } catch (err) {
-    console.log(err);
-
     resultsView.renderError();
   }
 };
@@ -71,6 +71,10 @@ const controlServings = function (newServings) {
   recipeView.update(model.state.recipe);
 };
 
+const controlBookmarks = function () {
+  bookmarksView.render(model.state.bookmarks);
+};
+
 const controlAddBookmark = function () {
   // 1.?) Add/remove the recipe as bookmarked if it isn't already
   if (!model.state.recipe.bookmarked) model.addBookmark(model.state.recipe);
@@ -84,6 +88,8 @@ const controlAddBookmark = function () {
 };
 
 const init = function () {
+  // Set eventHandler on load to add bookmarks from localStorage
+  bookmarksView.addHandlerRender(controlBookmarks);
   // Set eventHandler to recipe Component
   recipeView.addHandlerRender(controlRecipes);
 
