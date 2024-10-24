@@ -1,5 +1,5 @@
-import { API_URL, RES_PER_PAGE } from './config';
-import { getJSON } from './helpers';
+import { API_URL, RES_PER_PAGE, API_KEY } from './config';
+import { AJAX } from './helpers';
 const state = {
   recipe: {},
   search: {
@@ -11,9 +11,27 @@ const state = {
   bookmarks: [],
 };
 
+const createRecipeObject = function (data) {
+  const { recipe } = data.data;
+
+  // Removing _ and Replace with Camel Notation keys of Object
+  return {
+    id: recipe.id,
+    title: recipe.title,
+    publisher: recipe.publisher,
+    sourceUrl: recipe.source_url,
+    image: recipe.image_url,
+    servings: recipe.servings,
+    cookingTime: recipe.cooking_time,
+    ingredients: recipe.ingredients,
+    bookmarked: false,
+    ...(recipe.key && { key: recipe.key }),
+  };
+};
+
 const loadRecipe = async function (id) {
   try {
-    const data = await getJSON(`${API_URL}/${id}`);
+    const data = await AJAX(`${API_URL}/${id}?key=${API_KEY}`);
 
     // Structure from returned api call Json object:
     // data : {
@@ -24,20 +42,8 @@ const loadRecipe = async function (id) {
     //    }
     //    status : ""
     // }
-    const { recipe } = data.data;
 
-    // Removing _ and Replace with Camel Notation keys of Object
-    state.recipe = {
-      id: recipe.id,
-      title: recipe.title,
-      publisher: recipe.publisher,
-      sourceUrl: recipe.source_url,
-      image: recipe.image_url,
-      servings: recipe.servings,
-      cookingTime: recipe.cooking_time,
-      ingredients: recipe.ingredients,
-      bookmarked: false,
-    };
+    state.recipe = createRecipeObject(data);
 
     if (state.bookmarks.some(bookmark => bookmark.id === id))
       state.recipe.bookmarked = true;
@@ -50,7 +56,7 @@ const loadSearchResults = async function (query) {
   try {
     // 1) HTTP Request (GET)
     state.search.query = query;
-    const data = await getJSON(`${API_URL}/?search=${query}`);
+    const data = await AJAX(`${API_URL}/?search=${query}&key=${API_KEY}`);
 
     // Structure from returned api call Json object:
     // data : {
@@ -69,6 +75,7 @@ const loadSearchResults = async function (query) {
         title: recipe.title,
         publisher: recipe.publisher,
         image: recipe.image_url,
+        ...(recipe.key && { key: recipe.key }),
       };
     });
 
@@ -119,16 +126,59 @@ const removeBookmark = function (id) {
   if (id === state.recipe.id) state.recipe.bookmarked = false;
 };
 
-const init = function () {
-  const storage = localStorage.getItem('bookmarks');
-  if (storage) state.bookmarks = JSON.parse(storage);
+const uploadRecipe = async function (newRecipe) {
+  try {
+    // 1) Take Out ingredients of newRecipe Object to store them as Array
+    const ingredients = Object.entries(newRecipe)
+      .filter(entry => entry[0].startsWith('ingredient') && entry[1] !== '')
+      // Chain map over filtered array with ingredients Array : [ingredient-{i}][value]
+      .map(ing => {
+        const ingArr = ing[1].split(',').map(el => el.trim());
+
+        if (ingArr.length !== 3)
+          throw new Error(
+            'Wrong ingredient format! Please use the correct format'
+          );
+
+        const [quantity, unit, description] = ingArr;
+
+        return { quantity: quantity ? +quantity : null, unit, description };
+      });
+
+    const recipe = {
+      title: newRecipe.title,
+      source_url: newRecipe.sourceUrl,
+      image_url: newRecipe.image,
+      publisher: newRecipe.publisher,
+      cooking_time: +newRecipe.cookingTime,
+      servings: +newRecipe.servings,
+      ingredients,
+    };
+
+    // 2) Send Post request
+    const data = await AJAX(`${API_URL}?key=${API_KEY}`, recipe);
+
+    // 3) Store to state if there is success Promise
+    state.recipe = createRecipeObject(data);
+
+    // 4) Add this new recipe to bookmarks
+    addBookmark(state.recipe);
+  } catch (err) {
+    throw err;
+  }
 };
-init();
 
 // TODO: ONLY FOR DEVELOPMENT
 const clearBookmarks = function () {
   localStorage.clear('bookmarks');
 };
+clearBookmarks();
+
+const init = function () {
+  const storage = localStorage.getItem('bookmarks');
+  if (storage) state.bookmarks = JSON.parse(storage);
+};
+init();
 
 export {
   state,
@@ -138,4 +188,5 @@ export {
   updateServings,
   addBookmark,
   removeBookmark,
+  uploadRecipe,
 };
